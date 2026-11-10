@@ -1,27 +1,27 @@
-# Zona Joven TV
+# Zona Joven TV — rutas independientes
 
-Portal juvenil responsive con páginas independientes, slugs para noticias y videos, panel `/admin` y conexión a Supabase.
+## Corrección del error 404 en Vercel
+Se agregó `vercel.json` con una regla de reescritura para que las rutas amigables (`/noticias`, `/cultura`, `/noticia/slug`, etc.) carguen la aplicación y no devuelvan el 404 de Vercel.
 
-## Rutas
-- `/` inicio
-- `/noticias`, `/cultura`, `/comunidad`, `/educacion`, `/videos`
-- `/categoria/slug-de-categoria`
-- `/noticia/slug-de-la-noticia`
-- `/video/slug-del-video`
-- `/admin` panel privado (Supabase Auth)
+## Rutas incluidas
+- `/`
+- `/noticias`
+- `/cultura`
+- `/comunidad`
+- `/educacion`
+- `/videos`
+- `/categoria/slug`
+- `/noticia/slug`
+- `/video/slug`
 
-Vercel usa `vercel.json` para resolver las rutas limpias. Las páginas de detalle y categorías consultan Supabase desde el navegador.
+Las páginas de noticia y video muestran contenido de demostración mientras no esté conectado el backend editorial. Los slugs reales deberán venir de Supabase cuando se integre.
 
-## Activar Supabase
-1. En Supabase abre Project Settings > API y copia Project URL y la clave pública `anon`/`publishable`.
-2. Completa `supabase-config.js`. No uses `service_role` ni claves secretas en el navegador.
-3. Ejecuta `supabase-schema.sql` en SQL Editor.
-4. En Authentication > Users crea el usuario administrador (desactiva el registro público si no lo necesitas).
-5. Copia el UUID del usuario y ejecuta: `insert into public.profiles (id, role) values ('UUID_DEL_USUARIO', 'admin');`
-6. Despliega el proyecto en Vercel. Entra a `/admin` para iniciar sesión.
+## Publicar
+1. Descomprime el ZIP.
+2. Sube **el contenido de la carpeta `zona-joven-tv-main`** a la raíz del repositorio GitHub (donde está `index.html`).
+3. Confirma que `vercel.json`, `index.html`, `app.js` y `styles.css` queden en esa misma raíz.
+4. Haz commit/push y espera el nuevo deployment en Vercel.
+5. Prueba `/noticias`, `/cultura` y `/comunidad`.
 
-## Publicación
-Sube todos los archivos a la raíz del repositorio GitHub conectado a Vercel. Vercel debe usar framework Other, sin build command y con output directory `.`.
-
-## Importante
-El panel `/admin` está implementado, pero no podrá iniciar sesión ni guardar noticias hasta completar la configuración de Supabase y crear el perfil administrador. Las páginas usan renderizado en navegador; para que Facebook/WhatsApp lean metadatos distintos por noticia se requiere prerenderizado o una función de servidor/edge adicional. Sitemap actual incluye las páginas principales; agregar slugs publicados dinámicamente requiere generar el sitemap desde Supabase en servidor.
+## Nota sobre administración
+El ZIP base recibido no contenía panel administrativo ni conexión funcional a Supabase. Esta corrección resuelve las rutas del menú; no afirma que el panel de administración ya esté implementado.

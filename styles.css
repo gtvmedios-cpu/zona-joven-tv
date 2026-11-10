@@ -30,4 +30,3 @@
 .placeholder-photo:after,.mini-photo:after{content:"";position:absolute;right:12px;top:12px;width:36px;height:36px;background:#ffffffed url("https://cdn.phototourl.com/member/2026-11-10-232e563c-d33b-414d-9b3f-25ae06c97afe.png") center/contain no-repeat;border-radius:10px;padding:3px;box-shadow:0 3px 12px #102d4b30}
 .placeholder-photo,.mini-photo{position:relative}
 @media(max-width:640px){.brand img{width:48px;height:48px}.hero-logo-wrap{width:min(62%,230px);height:170px;border-radius:26px}.placeholder-photo:after,.mini-photo:after{width:30px;height:30px}}
-.route-page{min-height:55vh;padding-top:55px}.route-page .section-heading p{color:var(--muted);margin:10px 0 0}.article-detail{max-width:850px;margin:0 auto 50px;background:#fff;border:1px solid var(--line);border-radius:22px;padding:clamp(16px,4vw,34px);box-shadow:0 12px 35px #173b650a}.article-content{color:#33415b}.admin-msg{border-radius:12px;padding:15px;background:#fff5d9;color:#70520a}
