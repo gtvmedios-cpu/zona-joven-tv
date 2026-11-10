@@ -4,6 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#123b78">
+  <meta name="application-name" content="Zona Joven TV">
+  <meta name="apple-mobile-web-app-title" content="Zona Joven TV">
+  <link rel="manifest" href="site.webmanifest">
   <meta name="description" content="Zona Joven TV: Tu espacio, tu generación. Noticias, cultura, comunidad y actualidad.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://zona-joven-tv.vercel.app/">
@@ -14,6 +17,7 @@
   <meta property="og:url" content="https://zona-joven-tv.vercel.app/">
   <meta property="og:image" content="https://cdn.phototourl.com/member/2026-11-10-232e563c-d33b-414d-9b3f-25ae06c97afe.png">
   <meta property="og:image:alt" content="Logo oficial de Zona Joven TV">
+  <meta property="og:image:type" content="image/png">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Zona Joven TV | Tu espacio, tu generación">
   <meta name="twitter:description" content="Noticias, cultura, comunidad y actualidad con voz joven.">
@@ -34,7 +38,7 @@
       </a>
       <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
       <nav class="main-nav" id="main-nav" aria-label="Navegación principal">
-        <a class="active" href="#inicio">Inicio</a><a href="#noticias">Noticias</a><a href="#cultura">Cultura</a><a href="#comunidad">Comunidad</a><a href="#videos">Videos</a>
+        <a class="active" href="/">Inicio</a><a href="/noticias">Noticias</a><a href="/cultura">Cultura</a><a href="/comunidad">Comunidad</a><a href="/educacion">Educación</a><a href="/videos">Videos</a>
       </nav>
     </div>
   </header>
@@ -50,7 +54,7 @@
       <div class="hero-art" aria-label="Diseño gráfico de Zona Joven TV">
         <div class="sun"></div><div class="art-ring ring-one"></div><div class="art-ring ring-two"></div>
         <div class="art-label label-top">IDEAS QUE MUEVEN</div>
-        <div class="art-letters">ZJ<span>TV</span></div>
+        <div class="hero-logo-wrap"><img class="hero-logo" src="https://cdn.phototourl.com/member/2026-11-10-232e563c-d33b-414d-9b3f-25ae06c97afe.png" alt="Logo oficial de Zona Joven TV"></div>
         <div class="art-label label-bottom">JUVENTUD EN ACCIÓN</div>
         <div class="art-star">✳</div>
       </div>
@@ -91,10 +95,12 @@
 
     <section class="video-section" id="videos"><div class="container video-inner"><div><span class="section-kicker light">MIRA Y COMPARTE</span><h2>Historias en video</h2><p>Entrevistas, reportajes y contenidos especiales de nuestra comunidad.</p></div><div class="video-placeholder"><span class="play-button">▶</span><span>Próximamente en Zona Joven TV</span></div></div></section>
 
-    <section class="community-section container" id="comunidad"><div class="community-mark">ZJ<span>TV</span></div><div class="community-copy"><span class="section-kicker">SOMOS GENERACIÓN</span><h2>Las buenas ideas crecen cuando se comparten.</h2><p>Sigue nuestras redes sociales y participa en esta comunidad.</p></div><a class="button button-blue" href="#redes">Conecta con nosotros <span>→</span></a></section>
+    <section class="community-section container" id="comunidad"><div class="community-mark"><img src="https://cdn.phototourl.com/member/2026-11-10-232e563c-d33b-414d-9b3f-25ae06c97afe.png" alt="Logo de Zona Joven TV"></div><div class="community-copy"><span class="section-kicker">SOMOS GENERACIÓN</span><h2>Las buenas ideas crecen cuando se comparten.</h2><p>Sigue nuestras redes sociales y participa en esta comunidad.</p></div><a class="button button-blue" href="#redes">Conecta con nosotros <span>→</span></a></section>
   </main>
 
-  <footer class="site-footer" id="redes"><div class="container footer-main"><div class="footer-brand"><div class="footer-mark">ZJ<span>TV</span></div><div><strong>ZONA JOVEN TV</strong><p>Tu espacio, tu generación.</p></div></div><div class="footer-links"><strong>Explora</strong><a href="#noticias">Noticias</a><a href="#cultura">Cultura</a><a href="#comunidad">Comunidad</a><a href="#videos">Videos</a></div><div class="footer-links"><strong>Síguenos</strong><a href="#" aria-label="Facebook">Facebook</a><a href="#" aria-label="Instagram">Instagram</a><a href="#" aria-label="YouTube">YouTube</a><p class="social-note">Pronto agregaremos los enlaces oficiales.</p></div></div><div class="container footer-bottom"><span>© <span id="year"></span> Zona Joven TV. Todos los derechos reservados.</span><span>Un espacio para nuestra generación.</span></div></footer>
+  <footer class="site-footer" id="redes"><div class="container footer-main"><div class="footer-brand"><div class="footer-mark"><img src="https://cdn.phototourl.com/member/2026-11-10-232e563c-d33b-414d-9b3f-25ae06c97afe.png" alt="Logo de Zona Joven TV"></div><div><strong>ZONA JOVEN TV</strong><p>Tu espacio, tu generación.</p></div></div><div class="footer-links"><strong>Explora</strong><a href="#noticias">Noticias</a><a href="#cultura">Cultura</a><a href="#comunidad">Comunidad</a><a href="/videos">Videos</a><a href="/admin">Administración</a></div><div class="footer-links"><strong>Síguenos</strong><a href="#" aria-label="Facebook">Facebook</a><a href="#" aria-label="Instagram">Instagram</a><a href="#" aria-label="YouTube">YouTube</a><p class="social-note">Pronto agregaremos los enlaces oficiales.</p></div></div><div class="container footer-bottom"><span>© <span id="year"></span> Zona Joven TV. Todos los derechos reservados.</span><span>Un espacio para nuestra generación.</span></div></footer>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
