@@ -1,78 +1,19 @@
 # Zona Joven TV
 
-Portal web inicial con diseño adaptable y rutas limpias.
-
-## Rutas incluidas
-
-- `/` — página principal
-- `/noticias` — listado de noticias
-- `/cultura`, `/comunidad`, `/educacion` — secciones
-- `/categoria/actualidad` — página por categoría
-- `/noticia/mi-titular` — página de una noticia por slug
-- `/video/mi-video` — página de un video por slug
-- `/videos` — listado de videos
-
-Las rutas usan el historial del navegador y Vercel reescribe las direcciones a `index.html` mediante `vercel.json`.
+Sitio web inicial de Zona Joven TV, con diseño adaptable a computadores y celulares.
 
 ## Archivos
-
-- `index.html`: página principal y estructura.
+- `index.html`: estructura de la página.
 - `styles.css`: diseño y estilos.
-- `app.js`: navegación, páginas de sección y páginas de detalle.
-- `vercel.json`: reglas de reescritura para rutas directas en Vercel.
-- `supabase-schema.sql`: tabla inicial para publicaciones en Supabase.
+- `app.js`: menú móvil, filtros y año del pie de página.
+- Logo oficial: se carga desde la URL CDN suministrada y se usa en el encabezado, favicon, icono móvil y vista previa social.
 
-## Publicar en Vercel
+## Publicación en Vercel
+1. Sube estos archivos al repositorio de GitHub.
+2. En Vercel, importa el repositorio.
+3. Selecciona el framework `Other` si te pregunta.
+4. Deja el comando de compilación y el directorio de salida vacíos; la página es estática.
+5. Pulsa Deploy.
 
-1. Sube el contenido de esta carpeta a GitHub.
-2. Importa el repositorio en Vercel.
-3. Framework preset: `Other`.
-4. Build command: vacío; Output directory: `.`.
-5. Despliega.
-
-## Estado de la conexión con Supabase
-
-Esta entrega incluye el esquema SQL inicial y rutas de demostración. **Supabase todavía no está conectado**, no hay panel administrativo ni persistencia real de publicaciones. Para activarlo hay que ejecutar `supabase-schema.sql` en el SQL Editor del proyecto Supabase y conectar el proyecto con su URL y clave pública `anon` (nunca incluir la `service_role` en el navegador). Después se reemplaza el contenido de demostración por consultas a `posts` y se construye el panel administrativo con autenticación.
-
-## Importante sobre Facebook y WhatsApp
-
-Esta versión actualiza el título y la descripción SEO al navegar en el navegador, pero es una aplicación estática del lado del cliente. Los robots de Facebook/WhatsApp normalmente necesitan recibir las etiquetas Open Graph ya presentes en el HTML inicial. Para garantizar que cada enlace compartido muestre automáticamente la foto y el titular de la noticia, hace falta una función de renderizado previo/servidor que consulte Supabase y genere las etiquetas Open Graph para cada slug. Esa etapa no está incluida todavía.
-
-## Contenido
-
-Las publicaciones de `app.js` son ejemplos de demostración, no noticias reales. Reemplázalas cuando se conecte el panel editorial.
-
-## Panel administrativo y conexión real
-
-La carpeta ahora incluye `admin.html` y `admin.js`. La ruta `/admin` permite iniciar sesión con Supabase Auth, crear/editar/eliminar publicaciones, guardar borradores, publicar, administrar categorías y subir portadas a Storage. Las publicaciones públicas se consultan desde Supabase en la página web cuando se configura el proyecto. Si las credenciales siguen como marcadores, el sitio conserva el contenido de demostración.
-
-### Configuración obligatoria
-
-1. En `supabase-config.js`, reemplaza `PEGA_AQUI_TU_PROJECT_URL` por la Project URL y `PEGA_AQUI_TU_CLAVE_PUBLICA_ANON` por la clave publishable/anon de Supabase. Son valores públicos de cliente; jamás pegues una clave `service_role`.
-2. En Supabase > SQL Editor, ejecuta el archivo completo `supabase-schema.sql`.
-3. En Supabase > Authentication > Providers, habilita Email. En Authentication > Settings, desactiva los registros públicos (Allow new users to sign up). Crea manualmente el usuario administrador desde Authentication > Users. Así solo las cuentas que tú crees podrán autenticarse.
-4. En Authentication > URL Configuration, agrega el dominio de producción, por ejemplo `https://zonajoventv.com`, y la URL de redirección `https://zonajoventv.com/admin` (ajusta al dominio real).
-5. Sube todos los archivos de esta carpeta al repositorio GitHub conectado a Vercel y despliega. La ruta `/admin` reescribe a `admin.html`.
-
-### Seguridad y límites
-
-Las políticas RLS limitan la lectura pública de publicaciones a `published`; las escrituras requieren una sesión autenticada. El bucket `post-covers` permite lectura pública de las imágenes y escritura solo a usuarios autenticados. **No habilites el registro público** con estas políticas: el panel está pensado para usuarios administradores creados manualmente. Para un equipo editorial con distintos permisos, conviene agregar roles y una tabla de perfiles antes de abrir cuentas a otros usuarios.
-
-El editor incluido es un campo de texto multilínea, no un editor WYSIWYG avanzado. El contenido se muestra como texto con saltos de línea. Las vistas previas enriquecidas de Facebook/WhatsApp todavía requieren renderizado previo o una función de servidor que genere Open Graph por cada slug; cambiar metadatos con JavaScript no garantiza que los rastreadores sociales los lean.
-
-### Categorías
-
-Se pueden crear categorías desde el panel. La tabla y los slugs únicos están en Supabase; los enlaces públicos de sección que vienen en el diseño inicial siguen siendo `/cultura`, `/comunidad` y `/educacion`. Para categorías personalizadas, las URLs públicas pueden ampliarse en una siguiente iteración.
-
-## Identidad de marca y SEO (actualización noviembre de 2026)
-
-- `assets/logo.png` y `assets/logo.svg`: marca gráfica ZJTV usada en el encabezado y panel.
-- `assets/favicon.png`: icono de pestaña del navegador.
-- `assets/apple-touch-icon.png` y `manifest.webmanifest`: icono y datos para accesos directos en móviles.
-- `assets/og-image.png`: imagen social de 1200 × 630 para compartir la página principal.
-- `robots.txt` y `sitemap.xml`: instrucciones de rastreo y mapa de páginas públicas.
-- `index.html`: metadatos SEO, Open Graph, Twitter Cards y datos estructurados de organización.
-
-La dirección pública configurada en esta entrega es `https://zona-joven-tv.vercel.app`. Si se cambia el dominio, actualiza las URL absolutas en `index.html`, `app.js`, `robots.txt` y `sitemap.xml`.
-
-**Importante:** el icono generado es una versión gráfica tipográfica ZJTV coherente con el diseño que ya usa el sitio; no sustituye un archivo oficial de logo si tienes uno distinto. Google decide cuándo rastrear, indexar y mostrar el sitio; sitemap y metadatos ayudan, pero no garantizan posición ni aparición inmediata. Tras desplegar, añade el dominio como propiedad en Google Search Console y envía `https://zona-joven-tv.vercel.app/sitemap.xml`. Las vistas previas sociales específicas por noticia necesitan renderizado en servidor/prerenderizado; los metadatos cambiados con JavaScript no bastan para todos los rastreadores.
+## Importante
+Esta versión es la base visual. Las publicaciones que aparecen son ejemplos de diseño, no noticias reales. Supabase, inicio de sesión y panel administrativo se configurarán en una fase posterior. No añadas claves secretas a estos archivos ni al repositorio.
