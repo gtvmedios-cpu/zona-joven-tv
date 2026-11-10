@@ -22,7 +22,23 @@
 
   let routeKey = path.split('/')[1] || 'inicio';
   let content = '';
-  if (path === '/') {
+  if (path === '/admin') {
+    main.innerHTML = page('Panel administrativo','ZONA JOVEN TV','Administra las noticias y los contenidos de tu comunidad.', `
+      <section class="admin-panel">
+        <div class="admin-brand"><img src="https://cdn.phototourl.com/member/2026-11-10-232e563c-d33b-414d-9b3f-25ae06c97afe.png" alt="Zona Joven TV"><div><strong>ZONA JOVEN TV</strong><span>Centro de administración</span></div></div>
+        <div class="admin-notice"><strong>Panel administrativo disponible</strong><p>Esta dirección ya está habilitada. Para activar el inicio de sesión, la creación de noticias, las categorías y la subida de imágenes, falta conectar las credenciales de tu proyecto Supabase.</p></div>
+        <form class="admin-login" id="admin-login-form">
+          <h2>Iniciar sesión</h2>
+          <label for="admin-email">Correo electrónico</label><input id="admin-email" type="email" placeholder="tu correo de administrador" autocomplete="username" required>
+          <label for="admin-password">Contraseña</label><input id="admin-password" type="password" placeholder="Tu contraseña" autocomplete="current-password" required>
+          <button class="button button-blue" type="submit">Entrar al panel</button>
+          <p id="admin-status" role="status">Pendiente de configurar Supabase.</p>
+        </form>
+        <a class="button button-light" href="/">← Volver al sitio</a>
+      </section>`);
+    const form = document.getElementById('admin-login-form');
+    if (form) form.addEventListener('submit', e => { e.preventDefault(); const status=document.getElementById('admin-status'); status.textContent='El panel ya carga correctamente, pero el acceso aún no está conectado a Supabase. No ingreses aquí tu contraseña hasta completar esa configuración.'; });
+  } else if (path === '/') {
     // La portada conserva el diseño editorial original.
   } else if (categories[routeKey] && path.split('/').length === 2) {
     const cfg = categories[routeKey];

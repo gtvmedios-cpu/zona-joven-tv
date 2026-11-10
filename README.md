@@ -25,3 +25,6 @@ Las páginas de noticia y video muestran contenido de demostración mientras no 
 
 ## Nota sobre administración
 El ZIP base recibido no contenía panel administrativo ni conexión funcional a Supabase. Esta corrección resuelve las rutas del menú; no afirma que el panel de administración ya esté implementado.
+
+## Panel administrativo
+La ruta `/admin` ahora está contemplada por la aplicación y muestra la pantalla de acceso. El formulario es todavía una interfaz de acceso: para autenticar usuarios y administrar contenido hay que conectar el proyecto Supabase (URL, clave pública, tablas y políticas RLS). No se debe considerar habilitada la autenticación hasta completar esa conexión.
