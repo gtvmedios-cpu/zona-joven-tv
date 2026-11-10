@@ -19,7 +19,7 @@
   ];
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const page = (title,kicker,description,body) => `<section class="section container route-page"><div class="section-heading"><div><span class="section-kicker">${esc(kicker)}</span><h1>${esc(title)}</h1><p>${esc(description)}</p></div></div>${body}</section>`;
-  const articleCard = post => `<article class="news-card"><div class="mini-photo photo-blue" ${post.cover_image ? `style="background-image:url('${esc(post.cover_image)}');background-size:cover;background-position:center"` : ''}>${post.cover_image?'': 'ZJTV'}</div><div class="news-card-body"><span class="tag tag-blue">${esc((post.category_name || post.category || 'Actualidad').toUpperCase())}</span><h3>${esc(post.title)}</h3><p>${esc(post.excerpt || post.description || '')}</p><a class="read-link" href="/noticia/${encodeURIComponent(post.slug)}">Leer noticia →</a></div></article>`;
+  const articleCard = post => `<article class="news-card"><div class="mini-photo photo-blue" ${post.cover_image ? `style="background-image:url('${esc(post.cover_image)}');background-size:cover;background-position:center"` : ''}>${post.cover_image?'': 'ZJTV'}</div><div class="news-card-body"><span class="tag tag-blue">${esc((post.category_name || post.category || 'Actualidad').toUpperCase())}</span><h3>${esc(post.title)}</h3><p>${esc(post.excerpt || post.description || '')}</p><a class="read-link" href="/noticia/${encodeURIComponent(post.slug)}">Leer más →</a></div></article>`;
   const main = document.querySelector('main');
   if (!main) return;
 
@@ -29,6 +29,59 @@
     if(error) return demoPosts;
     return (data||[]).map(p=>({...p,category_name:p.categories?.name||'Actualidad',description:p.excerpt}));
   }
+
+  async function renderArticle(rawSlug){
+    const slug = decodeURIComponent(rawSlug || '').trim();
+    let post = null;
+    if (sb) {
+      const result = await sb.from('posts')
+        .select('id,title,slug,excerpt,content,cover_image,published_at,status,category_id,categories(name)')
+        .eq('slug', slug)
+        .eq('status', 'published')
+        .maybeSingle();
+      if (!result.error) post = result.data;
+      else console.error('No se pudo cargar la noticia:', result.error.message);
+    }
+    if (!post) {
+      const demo = demoPosts.find(item => item.slug === slug);
+      if (demo) post = {...demo, content: demo.description, status: 'published'};
+    }
+    if (!post) {
+      main.innerHTML = page('Noticia no encontrada','404','No encontramos una noticia publicada con esta dirección.','<a class="button button-blue" href="/noticias">Volver a noticias</a>');
+      document.title = 'Noticia no encontrada | Zona Joven TV';
+      return;
+    }
+    const categoryName = post.categories?.name || post.category_name || post.category || 'Noticias';
+    const image = post.cover_image
+      ? `<img class="article-cover" src="${esc(post.cover_image)}" alt="${esc(post.title)}" loading="eager">`
+      : '';
+    const date = post.published_at
+      ? new Date(post.published_at).toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'})
+      : '';
+    const content = esc(post.content || post.description || post.excerpt || 'Esta noticia no tiene contenido adicional.').replace(/\r?\n/g,'<br>');
+    main.innerHTML = page(post.title, categoryName.toUpperCase(), post.excerpt || '', `
+      <article class="article-detail">
+        ${image}
+        ${date ? `<p class="article-date">${esc(date)}</p>` : ''}
+        <div class="article-content">${content}</div>
+        <div class="article-footer"><a class="button button-blue" href="/noticias">← Volver a noticias</a></div>
+      </article>`);
+    document.title = `${post.title} | Zona Joven TV`;
+    const description = post.excerpt || post.title;
+    let meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute('content', description);
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) canonical.setAttribute('href', `${location.origin}/noticia/${encodeURIComponent(post.slug)}`);
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) ogTitle.setAttribute('content', post.title);
+    const ogDescription = document.querySelector('meta[property="og:description"]');
+    if (ogDescription) ogDescription.setAttribute('content', description);
+    const ogImage = document.querySelector('meta[property="og:image"]');
+    if (ogImage && post.cover_image) ogImage.setAttribute('content', post.cover_image);
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl) ogUrl.setAttribute('content', `${location.origin}/noticia/${encodeURIComponent(post.slug)}`);
+  }
+
   async function renderAdmin(){
     main.innerHTML=page('Panel administrativo','ZONA JOVEN TV','Administra las noticias y los contenidos de tu comunidad.',`<section class="admin-panel"><div class="admin-brand"><img src="https://cdn.phototourl.com/member/2026-11-10-232e563c-d33b-414d-9b3f-25ae06c97afe.png" alt="Zona Joven TV"><div><strong>ZONA JOVEN TV</strong><span>Centro de administración</span></div></div><div id="admin-app"><p>Comprobando conexión segura…</p></div><a class="button button-light" href="/">← Volver al sitio</a></section>`);
     const box=document.getElementById('admin-app');
@@ -77,7 +130,7 @@
       const cfg=categories[routeKey];let posts=await getPublishedPosts();if(cfg.category)posts=posts.filter(p=>(p.category_name||p.category)===cfg.category);const body=`<div class="news-grid">${posts.length?posts.map(articleCard).join(''):'<p>Próximamente publicaremos contenido en esta sección.</p>'}</div>`;main.innerHTML=page(cfg.title,cfg.kicker,cfg.description,body);
     }
     else if(routeKey==='categoria' && path.split('/')[2]){const slug=path.split('/')[2];const name=slug.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());let posts=await getPublishedPosts();posts=posts.filter(p=>clean(p.category_name||p.category)===slug);main.innerHTML=page(name,'CATEGORÍA',`Publicaciones clasificadas en ${name}.`,`<div class="news-grid">${posts.length?posts.map(articleCard).join(''):'<p>Aún no hay publicaciones en esta categoría.</p>'}</div>`);}
-    else if(routeKey==='noticia' && path.split('/')[2]){const slug=path.split('/')[2];let post=null;if(sb){const {data}=await sb.from('posts').select('*,categories(name)').eq('slug',slug).eq('status','published').maybeSingle();post=data;}if(!post){const d=demoPosts.find(p=>p.slug===slug);if(d)post={...d,content:d.description};}main.innerHTML=post?page(post.title,(post.categories?.name||post.category||'NOTICIAS').toUpperCase(),post.excerpt||post.description||'',`<article class="article-detail">${post.cover_image?`<img src="${esc(post.cover_image)}" alt="${esc(post.title)}" style="width:100%;max-height:480px;object-fit:cover;border-radius:18px">`:''}<div class="article-content">${esc(post.content||post.description||'').replace(/\n/g,'<br>')}</div><a class="button button-blue" href="/noticias">Volver a noticias</a></article>`):page('Noticia no encontrada','404','La dirección puede ser incorrecta o la noticia todavía no está publicada.','<a class="button button-blue" href="/noticias">Ver noticias</a>');}
+    else if(routeKey==='noticia' && path.split('/')[2]){await renderArticle(path.split('/')[2]);}
     else if(routeKey==='video'&&path.split('/')[2]){main.innerHTML=page('Video','ZONA JOVEN TV','Contenido audiovisual de nuestra comunidad.',`<p>El video solicitado todavía no está publicado.</p><a class="button button-blue" href="/videos">Volver a videos</a>`);}
     else{main.innerHTML=page('Página no encontrada','404','No encontramos la sección que estás buscando.','<a class="button button-blue" href="/">Volver al inicio</a>');}
     document.querySelectorAll('.main-nav a').forEach(a=>{const href=a.getAttribute('href');a.classList.toggle('active',href===path||(path==='/'&&href==='/'));});const year=document.getElementById('year');if(year)year.textContent=new Date().getFullYear();const toggle=document.getElementById('menu-toggle'),nav=document.getElementById('main-nav');if(toggle&&nav)toggle.addEventListener('click',()=>{const open=nav.classList.toggle('open');toggle.setAttribute('aria-expanded',String(open));toggle.textContent=open?'×':'☰';});
