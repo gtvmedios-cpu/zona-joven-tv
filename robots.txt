@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Sitemap: https://zona-joven-tv.vercel.app/sitemap.xml

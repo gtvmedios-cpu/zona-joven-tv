@@ -11,3 +11,19 @@
 @media(max-width:850px){.main-nav{gap:0}.main-nav a{padding:9px 8px;font-size:12px}.hero{gap:25px}.hero-art{height:310px}.featured-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.feature-main{grid-column:span 2}.feature-main .placeholder-photo{height:200px}.news-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.community-section{flex-wrap:wrap}.community-copy{min-width:60%}}
 @media(max-width:640px){.container{width:min(100% - 30px,1160px)}.top-strip-inner{padding:7px 0}.top-note{display:none}.header-inner{min-height:72px}.brand img{width:44px;height:44px}.brand-copy strong{font-size:14px}.brand-copy small{font-size:10px}.menu-toggle{display:block}.main-nav{display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border-bottom:1px solid var(--line);padding:12px 20px 18px;box-shadow:0 15px 20px #122b4710;flex-direction:column;align-items:stretch}.main-nav.open{display:flex}.main-nav a{padding:12px}.hero{grid-template-columns:1fr;padding-top:38px;padding-bottom:44px;gap:28px}.hero h1{font-size:clamp(44px,12vw,64px);margin:18px 0}.hero-copy p{font-size:15px}.hero-art{height:255px;border-radius:24px}.sun{width:130px;height:130px}.art-letters{font-size:90px;top:31%}.art-ring{width:270px;height:270px}.ring-two{width:350px;height:350px}.art-star{font-size:38px}.section{padding-bottom:48px}.section-heading{align-items:flex-start;flex-direction:column;gap:10px}.section-heading h2,.topic-inner h2,.video-inner h2{font-size:28px}.featured-grid,.news-grid{grid-template-columns:1fr}.feature-main{grid-column:auto}.feature-main .placeholder-photo,.placeholder-photo{height:180px}.topic-band{padding:40px 0}.topic-inner{align-items:flex-start;flex-direction:column;gap:20px}.topic-inner p,.video-inner p{font-size:14px}.video-section{padding:42px 0}.video-inner{grid-template-columns:1fr;gap:24px}.video-placeholder{min-height:190px}.community-section{gap:16px;padding-top:40px;padding-bottom:40px}.community-mark{flex-basis:64px;height:64px;border-radius:18px;font-size:24px}.community-copy{min-width:calc(100% - 85px)}.community-copy h2{font-size:21px}.community-section .button{margin-left:80px}.footer-main{grid-template-columns:1fr 1fr;gap:28px}.footer-brand{grid-column:span 2}.footer-bottom{flex-direction:column;gap:5px}.text-link{font-size:12px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}}
+
+/* Páginas independientes */
+.route-page{padding-top:44px;padding-bottom:76px;min-height:55vh}
+.route-page h1,.article-page h1{font:900 clamp(34px,5vw,54px)/1.1 Montserrat,sans-serif;letter-spacing:-.06em;color:var(--blue);margin:12px 0 14px}
+.route-intro{color:var(--muted);margin-bottom:26px}
+.article-page{max-width:850px;margin:28px auto 0}
+.article-date{font-size:12px;color:var(--muted);font-weight:700;margin:0 0 24px}
+.article-cover{width:100%;height:auto;max-height:480px;object-fit:cover;border-radius:20px;display:block;margin:25px 0}
+.article-page .placeholder-photo{height:340px}
+.article-lead{font-size:20px;line-height:1.5;font-weight:600;color:#40516a}
+.article-body{font-size:17px;line-height:1.85;color:#35445a;white-space:pre-line}
+.article-share{display:flex;align-items:center;gap:16px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:35px;padding-top:24px}
+@media(max-width:640px){.route-page{padding-top:30px}.article-page .placeholder-photo{height:220px}.article-lead{font-size:17px}}
+
+/* Identidad de marca compartida */
+.footer-logo{width:48px;height:48px;object-fit:contain;flex-shrink:0;border-radius:13px}
