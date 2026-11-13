@@ -1,23 +1,27 @@
-# Zona Joven TV — conexión de administración con Supabase
+# Zona Joven TV — versión actualizada
 
-## Configuración
-1. Publica el contenido de esta carpeta en la raíz del proyecto conectado a Vercel.
-2. En Supabase > SQL Editor ejecuta el archivo `SUPABASE_SETUP.sql`.
-3. En Supabase > Authentication > Users, crea el usuario con el correo y contraseña que usarás para entrar en `/admin` (o conserva el usuario que ya tengas).
-4. Copia el UUID del usuario y ejecuta en SQL Editor: `insert into public.admin_users(user_id) values ('UUID-DEL-USUARIO');`.
-5. Abre `https://zona-joven-tv.vercel.app/admin` e inicia sesión con ese correo y contraseña.
+## Incluye
+- Sitio adaptable con logo oficial.
+- Noticias con slug y página individual.
+- Metadatos Open Graph servidos desde `/api/noticia.js` para compartir noticias.
+- Panel `/admin` con autenticación Supabase y gestión de publicaciones.
+- Sección `/videos`: lista de videos publicados y páginas `/video/slug`.
+- Sección `/programas`: catálogo y páginas `/programa/slug` con episodios.
+- En el panel se pueden crear programas, subir videos MP4/WebM/OGG a Supabase Storage o pegar enlaces de YouTube/Vimeo, añadir portadas y guardar borradores/publicar.
+- Rutas absolutas para CSS, JavaScript y manifest.
 
-La URL y la clave pública publishable del proyecto están configuradas en `app.js`. La clave publishable puede estar en el navegador; la seguridad depende de RLS y de la tabla `admin_users`. Nunca publiques la clave `service_role`.
+## Publicación en Vercel
+1. Sube el contenido de esta carpeta (no la carpeta exterior) a la raíz del repositorio conectado a Vercel.
+2. Verifica que el proyecto use Node.js compatible con las funciones serverless de Vercel.
+3. Ejecuta primero `SUPABASE_SETUP.sql` si todavía no has configurado tablas, categorías y permisos.
+4. Ejecuta `VIDEOS_PROGRAMAS_SETUP.sql` en Supabase SQL Editor para crear las tablas, políticas RLS y bucket `zjtv-media`.
+5. Comprueba que el usuario administrador ya esté registrado en `public.admin_users`.
+6. Despliega en Vercel y prueba `/admin`, `/videos` y `/programas`.
 
-## Funciones
-- Inicio de sesión real con Supabase Auth.
-- Verificación adicional de pertenencia a `admin_users`.
-- Crear, editar, publicar, guardar borradores y eliminar noticias.
-- Slug generado desde el titular y normalizado.
-- Categorías iniciales y selector de categoría.
-- Subida de portada a Supabase Storage (`post-covers`).
-- Lectura pública solo de noticias publicadas.
-- Detalle de noticias por `/noticia/slug`.
+## Subida de videos
+- El archivo se guarda en el bucket público `zjtv-media`; el enlace público queda guardado en `videos.video_url`.
+- La implementación del panel limita el archivo a 100 MB. El límite real de Supabase puede depender del plan y de la configuración del proyecto; para videos grandes se recomienda YouTube/Vimeo.
+- Los enlaces de YouTube y Vimeo se convierten en reproductores incrustados.
 
-## Nota importante
-No basta con copiar el ZIP: hay que ejecutar el SQL y dar de alta el UUID del administrador. Sin esos pasos la autenticación puede funcionar, pero el panel denegará permisos editoriales. La clave del proyecto es pública (publishable); no contiene ni sustituye una contraseña de usuario.
+## Seguridad
+La clave publishable de Supabase puede estar en el navegador. La seguridad depende de las políticas RLS y del registro del administrador. Nunca publiques una clave `service_role`.

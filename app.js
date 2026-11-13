@@ -9,7 +9,7 @@
     cultura: {title:'Cultura', kicker:'EXPRESA · CREA · PARTICIPA', description:'Arte, música, talento y expresiones culturales de nuestra generación.', category:'Cultura'},
     comunidad: {title:'Comunidad', kicker:'SOMOS GENERACIÓN', description:'Historias, iniciativas y personas que transforman nuestro entorno.', category:'Comunidad'},
     educacion: {title:'Educación', kicker:'APRENDE · CRECE · AVANZA', description:'Ideas, oportunidades y herramientas para construir nuevos caminos.', category:'Educación'},
-    videos: {title:'Videos', kicker:'MIRA Y COMPARTE', description:'Entrevistas, reportajes y contenidos audiovisuales de nuestra comunidad.', category:'Videos'}
+    videos: {title:'Videos', kicker:'MIRA Y COMPARTE', description:'Entrevistas, reportajes y contenidos audiovisuales de nuestra comunidad.', category:'Videos'}, programas: {title:'Programas', kicker:'PRODUCCIONES ZONA JOVEN', description:'Conoce nuestros programas y sus nuevos episodios.', category:null}
   };
   const demoPosts = [
     {title:'Bienvenidos a Zona Joven TV',slug:'bienvenidos-a-zona-joven-tv',category:'Actualidad',description:'Muy pronto encontrarás aquí nuestras noticias y novedades.'},
@@ -82,6 +82,65 @@
     if (ogUrl) ogUrl.setAttribute('content', `${location.origin}/noticia/${encodeURIComponent(post.slug)}`);
   }
 
+
+  async function getPrograms(){
+    if(!sb) return [];
+    const {data,error}=await sb.from('programs').select('*').eq('status','published').order('created_at',{ascending:false});
+    if(error){console.error(error);return [];} return data||[];
+  }
+  async function getVideos(programId=null){
+    if(!sb) return [];
+    let q=sb.from('videos').select('*,programs(title,slug)').eq('status','published').order('published_at',{ascending:false});
+    if(programId) q=q.eq('program_id',programId);
+    const {data,error}=await q;if(error){console.error(error);return [];}return data||[];
+  }
+  const mediaCard = v => `<article class="media-card">
+    ${v.cover_image?`<img src="${esc(v.cover_image)}" alt="${esc(v.title)}" loading="lazy">`:`<div class="mini-photo photo-blue">ZJTV</div>`}
+    <div class="media-card-body"><span class="program-pill">${esc(v.programs?.title||'Zona Joven TV')}</span><h3>${esc(v.title)}</h3><p>${esc(v.description||'')}</p>
+    <a class="button button-blue" href="/video/${encodeURIComponent(v.slug)}">Ver video →</a></div></article>`;
+  function videoEmbed(url){
+    try{
+      const u=new URL(url);
+      if(u.hostname==='youtu.be') return `https://www.youtube-nocookie.com/embed/${u.pathname.slice(1)}`;
+      if(u.hostname.includes('youtube.com')){const id=u.searchParams.get('v')||u.pathname.split('/').filter(Boolean).pop();return `https://www.youtube-nocookie.com/embed/${id}`;}
+      if(u.hostname.includes('vimeo.com')) return `https://player.vimeo.com/video/${u.pathname.split('/').filter(Boolean).pop()}`;
+    }catch(e){}
+    return '';
+  }
+  async function renderVideo(slug){
+    const {data:v,error}=await sb.from('videos').select('*,programs(title,slug)').eq('slug',slug).eq('status','published').maybeSingle();
+    if(error||!v){main.innerHTML=page('Video no encontrado','404','Este video no está disponible.','<a class="button button-blue" href="/videos">Volver a videos</a>');return;}
+    let player='';
+    if(v.video_url){const embed=videoEmbed(v.video_url);player=embed?`<iframe class="media-player" src="${esc(embed)}" title="${esc(v.title)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`:`<video class="media-player" controls playsinline src="${esc(v.video_url)}"></video>`;}
+    main.innerHTML=page(v.title,'ZONA JOVEN TV',v.description||'',`<article class="article-detail">${player}<p>${esc(v.description||'')}</p>${v.programs?.slug?`<a class="button button-light" href="/programa/${encodeURIComponent(v.programs.slug)}">Ver programa ${esc(v.programs.title)}</a>`:''}<p><a class="button button-blue" href="/videos">← Todos los videos</a></p></article>`);
+    document.title=`${v.title} | Zona Joven TV`;
+  }
+  async function renderPrograms(){
+    const items=await getPrograms();
+    main.innerHTML=page('Programas','PRODUCCIONES ZONA JOVEN','Conoce nuestros programas y sus episodios.',`<div class="media-grid">${items.map(p=>`<article class="media-card">${p.cover_image?`<img src="${esc(p.cover_image)}" alt="${esc(p.title)}">`:''}<div class="media-card-body"><h2>${esc(p.title)}</h2><p>${esc(p.description||'')}</p><a class="button button-blue" href="/programa/${encodeURIComponent(p.slug)}">Ver programa →</a></div></article>`).join('')||'<p>Próximamente publicaremos nuestros programas.</p>'}</div>`);
+  }
+  async function renderProgram(slug){
+    const {data:p,error}=await sb.from('programs').select('*').eq('slug',slug).eq('status','published').maybeSingle();
+    if(error||!p){main.innerHTML=page('Programa no encontrado','404','No encontramos este programa.','<a class="button button-blue" href="/programas">Ver programas</a>');return;}
+    const videos=await getVideos(p.id);
+    main.innerHTML=page(p.title,'PROGRAMAS',p.description||'',`${p.cover_image?`<img class="article-cover" src="${esc(p.cover_image)}" alt="${esc(p.title)}">`:''}<div class="media-grid">${videos.map(mediaCard).join('')||'<p>Este programa todavía no tiene episodios publicados.</p>'}</div><p><a class="button button-light" href="/programas">← Todos los programas</a></p>`);
+  }
+  async function renderVideos(){
+    const items=await getVideos();
+    main.innerHTML=page('Videos','MIRA Y COMPARTE','Entrevistas, reportajes y contenidos audiovisuales.',`<div class="media-grid">${items.map(mediaCard).join('')||'<p>Próximamente publicaremos videos.</p>'}</div>`);
+  }
+  async function addMediaAdmin(box,session){
+    const admin=box.querySelector('.admin-dashboard'); if(!admin)return;
+    const {data:programs}=await sb.from('programs').select('id,title').order('title');
+    admin.insertAdjacentHTML('beforeend',`<section class="admin-editor"><h2>Programas</h2><form id="program-form"><label>Nombre del programa<input id="program-title" required maxlength="160"></label><label>Slug<input id="program-slug" required></label><label>Descripción<textarea id="program-description" rows="3"></textarea></label><label>Imagen de portada<input id="program-cover" type="file" accept="image/*"></label><button class="button button-blue">Crear programa</button><p id="program-message" role="status"></p></form><hr><h2>Subir videos y episodios</h2><form id="video-form"><label>Título<input id="video-title" required maxlength="180"></label><label>Slug<input id="video-slug" required></label><label>Descripción<textarea id="video-description" rows="3"></textarea></label><label>Programa<select id="video-program"><option value="">Video general</option>${(programs||[]).map(p=>`<option value="${p.id}">${esc(p.title)}</option>`).join('')}</select></label><label>Archivo de video (MP4/WebM, opcional)<input id="video-file" type="file" accept="video/mp4,video/webm,video/ogg"></label><small>Para archivos grandes usa un enlace de YouTube. El límite real depende de tu plan y configuración de Supabase Storage.</small><label>O enlace de YouTube/Vimeo<input id="video-url" type="url" placeholder="https://www.youtube.com/watch?v=..."></label><label>Imagen de portada<input id="video-cover" type="file" accept="image/*"></label><label>Estado<select id="video-status"><option value="draft">Borrador</option><option value="published">Publicado</option></select></label><button class="button button-blue">Guardar video</button><p id="video-message" role="status"></p></form></section>`);
+    const slugify=t=>clean(t);
+    document.getElementById('program-title').addEventListener('input',e=>document.getElementById('program-slug').value=slugify(e.target.value));
+    document.getElementById('video-title').addEventListener('input',e=>document.getElementById('video-slug').value=slugify(e.target.value));
+    async function upload(file,bucket,folder){if(!file)return null;const ext=(file.name.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'');const path=`${session.user.id}/${folder}/${crypto.randomUUID()}.${ext}`;const {error}=await sb.storage.from(bucket).upload(path,file,{upsert:false,contentType:file.type});if(error)throw error;return sb.storage.from(bucket).getPublicUrl(path).data.publicUrl;}
+    document.getElementById('program-form').addEventListener('submit',async e=>{e.preventDefault();const m=document.getElementById('program-message');m.textContent='Guardando…';try{const cover=await upload(document.getElementById('program-cover').files[0],'zjtv-media','programas');const payload={title:document.getElementById('program-title').value.trim(),slug:document.getElementById('program-slug').value,description:document.getElementById('program-description').value.trim(),cover_image:cover,status:'published'};const {error}=await sb.from('programs').insert(payload);if(error)throw error;m.textContent='Programa creado. Recarga el panel para verlo en la lista.';e.target.reset();}catch(err){m.textContent='Error: '+err.message;}});
+    document.getElementById('video-form').addEventListener('submit',async e=>{e.preventDefault();const m=document.getElementById('video-message');m.textContent='Guardando…';try{const file=document.getElementById('video-file').files[0];let videoUrl=document.getElementById('video-url').value.trim();if(file){if(file.size>100*1024*1024)throw new Error('El archivo supera 100 MB. Usa un enlace de YouTube o ajusta el límite de Storage.');videoUrl=await upload(file,'zjtv-media','videos');}if(!videoUrl)throw new Error('Selecciona un archivo o pega un enlace de video.');const cover=await upload(document.getElementById('video-cover').files[0],'zjtv-media','portadas');const payload={title:document.getElementById('video-title').value.trim(),slug:document.getElementById('video-slug').value,description:document.getElementById('video-description').value.trim(),program_id:document.getElementById('video-program').value||null,video_url:videoUrl,cover_image:cover,status:document.getElementById('video-status').value,published_at:document.getElementById('video-status').value==='published'?new Date().toISOString():null};const {error}=await sb.from('videos').insert(payload);if(error)throw error;m.textContent='Video guardado correctamente.';e.target.reset();}catch(err){m.textContent='Error: '+err.message;}});
+  }
+
   async function renderAdmin(){
     main.innerHTML=page('Panel administrativo','ZONA JOVEN TV','Administra las noticias y los contenidos de tu comunidad.',`<section class="admin-panel"><div class="admin-brand"><img src="https://cdn.phototourl.com/member/2026-11-10-232e563c-d33b-414d-9b3f-25ae06c97afe.png" alt="Zona Joven TV"><div><strong>ZONA JOVEN TV</strong><span>Centro de administración</span></div></div><div id="admin-app"><p>Comprobando conexión segura…</p></div><a class="button button-light" href="/">← Volver al sitio</a></section>`);
     const box=document.getElementById('admin-app');
@@ -108,6 +167,7 @@
       document.getElementById('post-reset').onclick=resetForm;
       document.getElementById('post-form').addEventListener('submit',savePost);
       await loadAdminPosts();
+      await addMediaAdmin(box,session);
       function resetForm(){document.getElementById('post-form').reset();document.getElementById('post-id').value='';document.getElementById('editor-title').textContent='Crear publicación';}
       async function savePost(e){e.preventDefault();const msg=document.getElementById('post-status-message');msg.textContent='Guardando…';const id=document.getElementById('post-id').value;let cover_image=null;const file=document.getElementById('post-image').files[0];
         if(file){const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'');const path=`${session.user.id}/${Date.now()}.${ext}`;const up=await sb.storage.from('post-covers').upload(path,file,{upsert:true,contentType:file.type});if(up.error){msg.textContent='Error al subir imagen: '+up.error.message;return;}cover_image=sb.storage.from('post-covers').getPublicUrl(path).data.publicUrl;}
@@ -131,7 +191,10 @@
     }
     else if(routeKey==='categoria' && path.split('/')[2]){const slug=path.split('/')[2];const name=slug.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());let posts=await getPublishedPosts();posts=posts.filter(p=>clean(p.category_name||p.category)===slug);main.innerHTML=page(name,'CATEGORÍA',`Publicaciones clasificadas en ${name}.`,`<div class="news-grid">${posts.length?posts.map(articleCard).join(''):'<p>Aún no hay publicaciones en esta categoría.</p>'}</div>`);}
     else if(routeKey==='noticia' && path.split('/')[2]){await renderArticle(path.split('/')[2]);}
-    else if(routeKey==='video'&&path.split('/')[2]){main.innerHTML=page('Video','ZONA JOVEN TV','Contenido audiovisual de nuestra comunidad.',`<p>El video solicitado todavía no está publicado.</p><a class="button button-blue" href="/videos">Volver a videos</a>`);}
+    else if(routeKey==='videos'){await renderVideos();}
+    else if(routeKey==='programas' && path.split('/').length===2){await renderPrograms();}
+    else if(routeKey==='programa' && path.split('/')[2]){await renderProgram(path.split('/')[2]);}
+    else if(routeKey==='video'&&path.split('/')[2]){await renderVideo(path.split('/')[2]);}
     else{main.innerHTML=page('Página no encontrada','404','No encontramos la sección que estás buscando.','<a class="button button-blue" href="/">Volver al inicio</a>');}
     document.querySelectorAll('.main-nav a').forEach(a=>{const href=a.getAttribute('href');a.classList.toggle('active',href===path||(path==='/'&&href==='/'));});const year=document.getElementById('year');if(year)year.textContent=new Date().getFullYear();const toggle=document.getElementById('menu-toggle'),nav=document.getElementById('main-nav');if(toggle&&nav)toggle.addEventListener('click',()=>{const open=nav.classList.toggle('open');toggle.setAttribute('aria-expanded',String(open));toggle.textContent=open?'×':'☰';});
   })();
